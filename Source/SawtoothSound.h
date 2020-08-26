@@ -35,7 +35,7 @@ struct SawtoothVoice : public juce::SynthesiserVoice
         printf("Sustain Value %f\n", referenceSliders->sSlider.getValue());
         printf("Release Value %f\n", referenceSliders->rSlider.getValue());
         currentAngle = 0.0;
-        level = velocity * 0.15;
+        level = ((velocity / 4) + 0.1) * 0.15;
         tailOff = 0.0;
         noteIsHeld = true;
         envelopeIndex = 0;
@@ -62,13 +62,13 @@ struct SawtoothVoice : public juce::SynthesiserVoice
             {
                 while(--numSamples >=0)
                 {
-                    auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
-                    auto currentSample = (float) (sawFromAngle(startSample) * sampleAmp * tailOff);
+                    //auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
+                    auto currentSample = (float) (sawFromAngle(startSample) * level * tailOff);
                     for(auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample(i, startSample, currentSample);
                     currentAngle += angleDelta;
                     ++startSample;
-                    ++envelopeIndex;
+                    ///++envelopeIndex;
                     
                     tailOff *= 0.99;
                     if(tailOff <= 0.005)
@@ -82,8 +82,8 @@ struct SawtoothVoice : public juce::SynthesiserVoice
             {
               while(--numSamples >= 0)
               {
-                  auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
-                  auto currentSample = (float) (sawFromAngle(startSample) * sampleAmp);
+                  //auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
+                  auto currentSample = (float) (sawFromAngle(startSample) * level);
                   for(auto i = outputBuffer.getNumChannels(); --i >= 0;)
                       outputBuffer.addSample(i, startSample, currentSample);
                   currentAngle += angleDelta;
