@@ -2,9 +2,8 @@
 //  ControlComponents.hpp
 //  MonoFM1 - App
 //
-//  Created by Hayden Setlik on 8/25/20.
+//  Created by Hayden Setlik on 8/26/20.
 //
-#pragma once
+
+#pragma  once
 #include <JuceHeader.h>
-
-
