@@ -8,7 +8,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "SineSound.h"
-#include "SawSound.h"
+#include "SawtoothSound.h"
 
 class SynthAudioSource : public juce::AudioSource
 {
@@ -17,11 +17,11 @@ public:
     : keyboardState(keyState)
     {
         for (auto i = 0; i < 4; ++i)                // [1]
-            synth.addVoice(new FMVoice());
+            synth.addVoice(new SawtoothVoice());
         
-        synth.addSound (new SineWaveSound());
+        synth.addSound (new SawWaveSound());
     };
-    void setUsingSawWaveSound()
+    void setUsingSineWaveSound()
     {
         synth.clearSounds();
     }
