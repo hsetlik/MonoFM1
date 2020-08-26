@@ -19,7 +19,7 @@ struct SawWaveSound : public juce::SynthesiserSound
 
 struct SawtoothVoice : public juce::SynthesiserVoice
 {
-    SawtoothVoice(adsrSliderSet* sliders) : envelopeLevel(sliders)
+    SawtoothVoice(adsrSliderSet* sliders)
     {
         referenceSliders = sliders;
     }
@@ -29,11 +29,6 @@ struct SawtoothVoice : public juce::SynthesiserVoice
     }
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound*, int /*currentPitchWheelPosition*/) override
     {
-        envelopeLevel.updateSettings();
-        printf("Attack Value %f\n", referenceSliders->aSlider.getValue());
-        printf("Decay Value %f\n", referenceSliders->dSlider.getValue());
-        printf("Sustain Value %f\n", referenceSliders->sSlider.getValue());
-        printf("Release Value %f\n", referenceSliders->rSlider.getValue());
         currentAngle = 0.0;
         level = ((velocity / 4) + 0.1) * 0.15;
         tailOff = 0.0;
@@ -55,7 +50,6 @@ struct SawtoothVoice : public juce::SynthesiserVoice
     }
     void renderNextBlock(juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
-        envelopeLevel.updateSettings();
         if(angleDelta != 0.0)
         {
             if(tailOff > 0.0)
@@ -115,7 +109,6 @@ private:
     double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0, rampDelta = 0.0, currentAmp = 0.0;
     bool noteIsHeld = false;
     adsrSliderSet* referenceSliders;
-    adsrAmplifier envelopeLevel;
     int envelopeIndex;
 };
 

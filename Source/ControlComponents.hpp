@@ -93,16 +93,3 @@ public:
     SustainSlider sSlider;
     ReleaseSlider rSlider;
 };
-
-class adsrAmplifier
-{
-public:
-    adsrAmplifier(adsrSliderSet* sliders);
-    void updateSettings();
-    double nextSampleAmplitude(int sampleRate, bool noteIsOn);
-private:
-    double attackVal = 0.0, decayVal = 0.0, sustainVal = 0.0, releaseVal = 0.0;
-    adsrSliderSet* sourceSliderSet;
-    int gateSampleLength = 0;
-    int envelopeSampleIndex = 0;
-};
