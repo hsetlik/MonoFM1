@@ -30,6 +30,7 @@ struct SawtoothVoice : public juce::SynthesiserVoice
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound*, int /*currentPitchWheelPosition*/) override
     {
         envelopeLevel.updateSettings();
+        envelopeLevel.getInitialLength(getSampleRate());
         printf("Attack Value %f\n", referenceSliders->aSlider.getValue());
         printf("Decay Value %f\n", referenceSliders->dSlider.getValue());
         printf("Sustain Value %f\n", referenceSliders->sSlider.getValue());
@@ -55,15 +56,15 @@ struct SawtoothVoice : public juce::SynthesiserVoice
     }
     void renderNextBlock(juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
-        envelopeLevel.updateSettings();
+        
         if(angleDelta != 0.0)
         {
             if(tailOff > 0.0)
             {
                 while(--numSamples >=0)
                 {
-                    //auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
-                    auto currentSample = (float) (sawFromAngle(startSample) * level * tailOff);
+                    auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
+                    auto currentSample = (float) (sawFromAngle(startSample) * sampleAmp);
                     for(auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample(i, startSample, currentSample);
                     currentAngle += angleDelta;
@@ -82,8 +83,8 @@ struct SawtoothVoice : public juce::SynthesiserVoice
             {
               while(--numSamples >= 0)
               {
-                  //auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
-                  auto currentSample = (float) (sawFromAngle(startSample) * level);
+                  auto sampleAmp = envelopeLevel.nextSampleAmplitude(getSampleRate(), noteIsHeld);
+                  auto currentSample = (float) (sawFromAngle(startSample) * sampleAmp);
                   for(auto i = outputBuffer.getNumChannels(); --i >= 0;)
                       outputBuffer.addSample(i, startSample, currentSample);
                   currentAngle += angleDelta;

@@ -98,11 +98,21 @@ class adsrAmplifier
 {
 public:
     adsrAmplifier(adsrSliderSet* sliders);
+    enum stage
+    {
+        Attack,
+        Decay,
+        Sustain,
+        Release,
+        Off
+    };
+    void getInitialLength(int sampleRate);
     void updateSettings();
     double nextSampleAmplitude(int sampleRate, bool noteIsOn);
 private:
     double attackVal = 0.0, decayVal = 0.0, sustainVal = 0.0, releaseVal = 0.0;
     adsrSliderSet* sourceSliderSet;
-    int gateSampleLength = 0;
+    int envelopeSampleLength = 0;
     int envelopeSampleIndex = 0;
+    stage currentStage;
 };

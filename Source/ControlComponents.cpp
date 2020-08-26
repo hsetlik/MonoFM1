@@ -12,18 +12,22 @@ adsrSliderSet::adsrSliderSet()
     addAndMakeVisible(aSlider);
     aSlider.setRange(0.0, 2.0); //attack length can be between 0 and 2 seconds
     aSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    aSlider.setValue(1.0);
     
     addAndMakeVisible(dSlider);
     dSlider.setRange(0.0, 3.0); //decay between 0 and 3 seconds
     dSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    dSlider.setValue(1.5);
     
     addAndMakeVisible(sSlider);
     sSlider.setRange(0.0, 1.0); //sustain between 0% and 100% of max volume
     sSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    sSlider.setValue(0.5);
     
     addAndMakeVisible(rSlider);
     rSlider.setRange(0.0, 4.0); //release between 0 and 4 seconds
     rSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    rSlider.setValue(2.0);
 }
 
 void adsrSliderSet::resized()
@@ -52,52 +56,78 @@ void adsrAmplifier::updateSettings()
     sustainVal = (float) sourceSliderSet->sSlider.getValue();
     releaseVal = (float) sourceSliderSet->rSlider.getValue();
 }
+void adsrAmplifier::getInitialLength(int sampleRate)
+{
+    double attackLengthSamples = attackVal * (double) sampleRate;
+    double decayLengthSamples = decayVal * (double) sampleRate;
+    envelopeSampleLength = (int) (attackLengthSamples + decayLengthSamples);
+    printf("initial length setting: %d\n", envelopeSampleLength);
+}
 
 double adsrAmplifier::nextSampleAmplitude(int sampleRate, bool noteIsOn)
 {
     updateSettings();
-    int sampleIndex = envelopeSampleIndex;
-    double attackLengthSamples = sampleRate * (attackVal + 0.000001);//avoiding a divide by zero error
-    //printf("Attack length: %f\n", attackLengthSamples);
-    double decayLengthSamples = sampleRate * (decayVal + 0.0001);
-    double releaseLengthSamples = sampleRate * (releaseVal + 0.0001);
-    double sustainLevel = sustainVal;
-    //delta values by sample for each phase
-    double decayDelta = (1.0 - sustainVal) / decayLengthSamples;
-    double releaseDelta = sustainLevel / releaseLengthSamples;
-    if(sampleIndex < attackLengthSamples) //rules for the attack phase
+    double attackLengthSamples = attackVal * (double) sampleRate;
+    //envelopeSampleLength += attackLengthSamples;
+    double decayLengthSamples = decayVal * (double) sampleRate;
+    //envelopeSampleLength += decayLengthSamples;
+     double releaseLengthSamples = releaseVal * (double) sampleRate;
+    double samplesBeforeSustain = attackLengthSamples + decayLengthSamples; //keep track of how many samples elapse before sustain
+    printf("envelope length: %d\n", envelopeSampleLength);
+    if(envelopeSampleIndex < attackLengthSamples && noteIsOn)
     {
-        ++gateSampleLength;
-        double attackDelta = (1.0 / attackLengthSamples);
-        //printf("attack delta = 1 / %d\n", attackLengthSamples);
-        //printf("decimal attackDelta = %f\n", attackDelta);
-        double attackOutput = (attackDelta * (double)(sampleIndex + 0.000001));
-        //printf("pre-division output = %f\n", attackOutput);
-        printf("attack amp: %f at sample %d\n", attackOutput, sampleIndex);
-        ++envelopeSampleIndex;
-        return attackOutput;
-    } else if(sampleIndex < (attackLengthSamples + decayLengthSamples)) //rules for the decay phase
+        printf("In attack Stage\n");
+        currentStage = Attack;
+    } else if (envelopeSampleIndex < samplesBeforeSustain && noteIsOn)
     {
-        ++gateSampleLength;
-        double decaySampleIndex = sampleIndex - attackLengthSamples;
-        printf("decay amp: %f\n", 1.0 - (decayDelta * decaySampleIndex));
-        ++envelopeSampleIndex;
-        return 1.0 - (decayDelta * decaySampleIndex);
-    } else if(noteIsOn) //sustain phase
+        printf("In decay Stage\n");
+        currentStage = Decay;
+    } else if (envelopeSampleIndex > (int)samplesBeforeSustain && noteIsOn)
     {
-        ++gateSampleLength;
-        printf("sustain amp: %f\n", sustainLevel);
-        ++envelopeSampleIndex;
-        return sustainLevel;
-    } else if ((gateSampleLength + 0.000001) < sampleIndex)// release phase
+        envelopeSampleLength += 1;
+        printf("In sustain Stage\n");
+        currentStage = Sustain;
+    } else if (envelopeSampleIndex > (envelopeSampleLength) && !noteIsOn && envelopeSampleIndex <= (envelopeSampleLength + releaseLengthSamples))
     {
-        int releaseIndex = sampleIndex - (double)gateSampleLength;
-        printf("release amp: %f\n", sustainLevel - (releaseDelta * releaseIndex));
-        ++envelopeSampleIndex;
-        return sustainLevel - (releaseDelta * releaseIndex);
-    } else {
-        envelopeSampleIndex = 0;
-        return 0.0;
+        printf("In release Stage\n");
+        currentStage = Release;
+    } else
+    {
+        printf("In off Stage\n");
+        currentStage = Off;
     }
+    //second step: calculate the deltas per sample for the attack, decay, and release lines
+    double attackDelta = 1.0 / (attackLengthSamples + 0.0001); //avoiding divide-by-zero error
+    double decayDelta = (1.0 - sustainVal) / (decayLengthSamples + 0.0001);
+    double releaseDelta = sustainVal / (releaseLengthSamples + 0.0001);
+    //third: determine the correct coefficient for each delta based on the index
+    double attackIndex = envelopeSampleIndex;
+    double decayIndex = envelopeSampleIndex - attackLengthSamples;
+    double releaseIndex = envelopeSampleIndex - envelopeSampleLength;
+    //fourth: determine which delta/index pair to use with a switch statement
+    double returnValue;
+    switch(currentStage){
+        case Attack:
+            returnValue = attackDelta * attackIndex;
+            break;
+        case Decay:
+            returnValue = 1.0 - (decayDelta * decayIndex);
+            break;
+        case Sustain:
+            returnValue = sustainVal;
+            break;
+        case Release:
+            returnValue = sustainVal - (releaseIndex * releaseDelta);
+            break;
+        case Off:
+            returnValue = 0.0;
+            envelopeSampleIndex = 0.0;
+            envelopeSampleLength = 0.0;
+            break;
+    }
+    printf("sample #: %d\n", envelopeSampleIndex);
+    printf("amplitude setting: %f\n", returnValue);
+    envelopeSampleIndex += 1.0;
+    return returnValue;
 }
 
