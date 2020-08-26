@@ -7,6 +7,7 @@
 
 #pragma  once
 #include <JuceHeader.h>
+#include <stdio.h>
 
 class AttackSlider : public juce::Slider
 {
@@ -87,10 +88,21 @@ class adsrSliderSet : public juce::Component
 public:
     adsrSliderSet();
     void resized() override;
-private:
     AttackSlider aSlider;
     DecaySlider dSlider;
     SustainSlider sSlider;
     ReleaseSlider rSlider;
 };
 
+class adsrAmplifier
+{
+public:
+    adsrAmplifier(adsrSliderSet* sliders);
+    void updateSettings();
+    double nextSampleAmplitude(int sampleRate, bool noteIsOn);
+private:
+    double attackVal = 0.0, decayVal = 0.0, sustainVal = 0.0, releaseVal = 0.0;
+    adsrSliderSet* sourceSliderSet;
+    int gateSampleLength = 0;
+    int envelopeSampleIndex = 0;
+};

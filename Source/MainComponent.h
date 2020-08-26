@@ -3,7 +3,6 @@
 #include <JuceHeader.h>
 
 #include "SynthAudioSource.hpp"
-#include "ControlComponents.hpp"
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -16,8 +15,9 @@ public:
     MainComponent() : audioSource (keyboardState),
                       keyboardComponent (keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
     {
+        sliderComponents = &audioSource.masterSliders;
         addAndMakeVisible(keyboardComponent);
-        addAndMakeVisible(envelopeSliders);
+        addAndMakeVisible(*sliderComponents);
         
         
         addAndMakeVisible (midiInputListLabel);
@@ -64,12 +64,12 @@ public:
 private:
     //==============================================================================
     // Your private member variables go here...
-    adsrSliderSet envelopeSliders;
     juce::MidiKeyboardState keyboardState;
     SynthAudioSource audioSource;
     juce::MidiKeyboardComponent keyboardComponent;
     juce::ComboBox midiInputList;
     juce::Label midiInputListLabel;
+    adsrSliderSet* sliderComponents;
     int lastInputIndex = 0;
     void timerCallback() override;
     void setMidiInput(int index);

@@ -17,7 +17,7 @@ public:
     : keyboardState(keyState)
     {
         for (auto i = 0; i < 4; ++i)                // [1]
-            synth.addVoice(new SawtoothVoice());
+            synth.addVoice(new SawtoothVoice(&masterSliders));
         
         synth.addSound (new SawWaveSound());
     };
@@ -53,9 +53,10 @@ public:
     {
         return &midiCollector;
     }
-
+    adsrSliderSet masterSliders;
 private:
     juce::MidiKeyboardState& keyboardState;
     juce::Synthesiser synth;
     juce::MidiMessageCollector midiCollector;
+   
 };

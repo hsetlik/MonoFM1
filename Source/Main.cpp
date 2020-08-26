@@ -15,12 +15,12 @@ public:
     //==============================================================================
     Application() = default;
 
-    const juce::String getApplicationName() override       { return "SynthUsingMidiInputTutorial"; }
+    const juce::String getApplicationName() override       { return "MonoFM1"; }
     const juce::String getApplicationVersion() override    { return "1.0.0"; }
 
     void initialise (const juce::String&) override
     {
-        mainWindow.reset (new MainWindow ("SynthUsingMidiInputTutorial", new MainComponent, *this));
+        mainWindow.reset (new MainWindow ("MonoFM1", new MainComponent, *this));
     }
 
     void shutdown() override                         { mainWindow = nullptr; }
