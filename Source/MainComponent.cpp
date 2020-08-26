@@ -25,7 +25,8 @@ void MainComponent::releaseResources()
 void MainComponent::resized()
 {
     midiInputList.setBounds(200, 10, getWidth() - 210, 20);
-    keyboardComponent.setBounds (10, 40, getWidth() - 20, getHeight() - 50);
+    keyboardComponent.setBounds (10, 40, getWidth() - 20, getHeight() - 130);
+    envelopeSliders.setBounds(10, 40 + (getHeight() - 130), getWidth() - 150, 80);
 }
 
 void MainComponent::timerCallback()
