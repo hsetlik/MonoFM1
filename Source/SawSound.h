@@ -1,5 +1,5 @@
 //
-//  SineSound.h
+//  SawSound.h
 //  MonoFM1
 //
 //  Created by Hayden Setlik on 8/25/20.
@@ -8,19 +8,19 @@
 #pragma once
 #include <JuceHeader.h>
 
-struct SineWaveSound : public juce::SynthesiserSound
+struct SawWaveSound : public juce::SynthesiserSound
 {
-    SineWaveSound() {};
+    SawWaveSound() {};
     bool appliesToNote (int) override {return true;};
     bool appliesToChannel (int) override {return true;};
 };
 
-struct FMVoice : public juce::SynthesiserVoice
+struct SawVoice : public juce::SynthesiserVoice
 {
-    FMVoice() {}
+    SawVoice() {}
     bool canPlaySound(juce::SynthesiserSound* sound) override
     {
-        return dynamic_cast<SineWaveSound*>(sound) != nullptr;
+        return dynamic_cast<SawWaveSound*>(sound) != nullptr;
     }
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound*, int /*currentPitchWheelPosition*/) override
     {
@@ -90,7 +90,3 @@ struct FMVoice : public juce::SynthesiserVoice
 private:
     double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
 };
-
-
-
-
