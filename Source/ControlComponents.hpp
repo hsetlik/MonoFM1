@@ -14,16 +14,14 @@ public:
     AttackSlider() {}
     double getValueFromText (const juce::String& text) override
         {
-            auto minusInfinitydB = -100.0;
-    
-            auto decibelText = text.upToFirstOccurrenceOf ("s", false, false).trim();    // [1]
-    
-            return decibelText.equalsIgnoreCase ("-INF") ? minusInfinitydB
-                                                         : decibelText.getDoubleValue();  // [2]
+            return text.getDoubleValue() ;// [2]
         }
     juce::String getTextFromValue (double value) override
     {
-        return juce::Decibels::toString (value);
+        juce::String displayValue = juce::String(value);
+        auto displayText = displayValue.substring(0, 4);
+        juce::String unitLabel = juce::String(" s");
+        return displayText + unitLabel;
     }
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttackSlider)
 };
@@ -34,16 +32,14 @@ public:
     DecaySlider() {}
     double getValueFromText (const juce::String& text) override
         {
-            auto minusInfinitydB = -100.0;
-    
-            auto decibelText = text.upToFirstOccurrenceOf ("s", false, false).trim();    // [1]
-    
-            return decibelText.equalsIgnoreCase ("-INF") ? minusInfinitydB
-                                                         : decibelText.getDoubleValue();  // [2]
+            return text.getDoubleValue() ;// [2]
         }
     juce::String getTextFromValue (double value) override
     {
-        return juce::Decibels::toString (value);
+        juce::String displayValue = juce::String(value);
+        auto displayText = displayValue.substring(0, 4);
+        juce::String unitLabel = juce::String(" s");
+        return displayText + unitLabel;
     }
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DecaySlider)
 };
@@ -54,16 +50,15 @@ public:
     SustainSlider() {}
     double getValueFromText (const juce::String& text) override
         {
-            auto minusInfinitydB = -100.0;
-    
-            auto decibelText = text.upToFirstOccurrenceOf ("%", false, false).trim();    // [1]
-    
-            return decibelText.equalsIgnoreCase ("-INF") ? minusInfinitydB
-                                                         : decibelText.getDoubleValue();  // [2]
+            return text.getDoubleValue() ;// [2]
         }
     juce::String getTextFromValue (double value) override
     {
-        return juce::Decibels::toString (value);
+        double percentValue = value * 100;
+        juce::String displayValue = juce::String(percentValue);
+        auto displayText = displayValue.substring(0, 4);
+        juce::String unitLabel = juce::String("%");
+        return displayText + unitLabel;
     }
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SustainSlider)
 };
@@ -74,16 +69,14 @@ public:
     ReleaseSlider() {}
     double getValueFromText (const juce::String& text) override
         {
-            auto minusInfinitydB = -100.0;
-    
-            auto decibelText = text.upToFirstOccurrenceOf ("s", false, false).trim();    // [1]
-    
-            return decibelText.equalsIgnoreCase ("-INF") ? minusInfinitydB
-                                                         : decibelText.getDoubleValue();  // [2]
+            return text.getDoubleValue() ;// [2]
         }
     juce::String getTextFromValue (double value) override
     {
-        return juce::Decibels::toString (value);
+        juce::String displayValue = juce::String(value);
+        auto displayText = displayValue.substring(0, 4);
+        juce::String unitLabel = juce::String(" s");
+        return displayText + unitLabel;
     }
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReleaseSlider)
 };
