@@ -15,6 +15,7 @@ struct SawWaveSound : public juce::SynthesiserSound
     bool appliesToChannel (int) override {return true;};
 };
 
+
 struct SawtoothVoice : public juce::SynthesiserVoice
 {
     SawtoothVoice() {}
@@ -30,10 +31,18 @@ struct SawtoothVoice : public juce::SynthesiserVoice
         
         auto cyclesPerSecond = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
         auto cyclesPerSample = cyclesPerSecond / getSampleRate();
+        auto samplesPerCycle = 1 / cyclesPerSample;
+        rampDelta = 2 / samplesPerCycle;
         //angleDelta will need to change for FM control
         angleDelta = cyclesPerSample * 2 * juce::MathConstants<double>::pi;
     }
-    
+    double sawFromAngle(int sampleIndex)
+    {
+        auto  samplesPerCycle = (int) (2 / rampDelta);
+        int indexInCycle = samplesPerCycle % (sampleIndex + 1);
+        double offset = indexInCycle * rampDelta;
+        return (-1 + offset);
+    }
     void renderNextBlock(juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
         if(angleDelta != 0.0)
@@ -42,7 +51,7 @@ struct SawtoothVoice : public juce::SynthesiserVoice
             {
                 while(--numSamples >=0)
                 {
-                    auto currentSample = (float) (std::sin(currentAngle) * level * tailOff);
+                    auto currentSample = (float) (sawFromAngle(startSample) * level * tailOff);
                     for(auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample(i, startSample, currentSample);
                     currentAngle += angleDelta;
@@ -60,7 +69,7 @@ struct SawtoothVoice : public juce::SynthesiserVoice
             {
               while(--numSamples >= 0)
               {
-                  auto currentSample = (float) (std::sin(currentAngle) * level);
+                  auto currentSample = (float) (sawFromAngle(startSample) * level);
                   for(auto i = outputBuffer.getNumChannels(); --i >= 0;)
                       outputBuffer.addSample(i, startSample, currentSample);
                   currentAngle += angleDelta;
@@ -88,7 +97,7 @@ struct SawtoothVoice : public juce::SynthesiserVoice
         }
     }
 private:
-    double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
+    double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0, rampDelta = 0.0, currentAmp = 0.0;
 };
 
 
