@@ -17,9 +17,9 @@ public:
     : keyboardState(keyState)
     {
         for (auto i = 0; i < 4; ++i)                // [1]
-            synth.addVoice(new SawtoothVoice(&masterSliders));
+            synth.addVoice(new FMVoice());
         
-        synth.addSound (new SawWaveSound());
+        synth.addSound (new SineWaveSound());
     };
     void setUsingSineWaveSound()
     {
